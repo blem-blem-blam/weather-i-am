@@ -1,0 +1,21 @@
+# docker-compose.test.yml
+version: '3.8'
+
+services:
+  test-db:
+    # Use a specific PostgreSQL image
+    image: postgres:15-alpine
+
+    # Name the container for easy identification
+    container_name: my_app_test_db
+
+    # Environment variables to configure the database
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
+      - POSTGRES_DB=testdb
+
+    # Map the container's port 5432 to your computer's port 5433
+    # This avoids conflicts if you have another PostgreSQL server running on the default port 5432
+    ports:
+      - "5433:5432"
