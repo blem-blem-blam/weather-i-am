@@ -7,7 +7,7 @@ from app.services.user_service import UserService
 router = APIRouter()
 
 
-@router.post("/users/", response_model=None)
+@router.post("", response_model=None)
 async def create_user(
     username: str,
     email: str,

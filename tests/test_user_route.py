@@ -38,3 +38,4 @@ async def test_get_user_params(client: AsyncClient, session: AsyncSession):
     assert response.status_code == 200
     assert response.json()["user_id"] == str(user.id)
     assert response.json()["id"]
+    assert response.json()["time_created"]

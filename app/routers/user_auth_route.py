@@ -8,6 +8,7 @@ from app.models.user_model import User
 from ..services.auth_service import (
     AuthService,
     Token,
+    TokenPayload,
     decode_user_jwt,
 )
 
@@ -45,9 +46,9 @@ async def login_for_access_token(
     return token
 
 
-@router.get("/me/", response_model=User)
+@router.get("/me", response_model=TokenPayload)
 async def read_users_me(
-    current_user: Annotated[User, Depends(decode_user_jwt)],
+    current_user: Annotated[TokenPayload, Depends(decode_user_jwt)],
 ):
     """
     Get the details for the currently authenticated user.
