@@ -19,8 +19,16 @@ class UserService(BaseService):
             is_active=True,
             is_superuser=False,
         )
+        # Add the user to the session
         await UserDataManager(self.session).add_user(user_to_add)
+
+        # Flush the session to send the user to the DB and get the generated ID
+        await self.session.flush()
+
+        # Now create the associated parameters using the new user's ID
         await UserParameterService(self.session).add_parameter(user_to_add.id)
+
+        # Commit the entire transaction (user and parameters)
         await self.session.commit()
 
 
@@ -34,6 +42,5 @@ class UserDataManager(BaseDataManager):
         return await self.get_one(select_stmt)
 
     async def add_user(self, user: User) -> None:
+        """Adds a user object to the session."""
         self.add_one(user)
-        await self.session.flush()
-        await self.session.refresh(user)

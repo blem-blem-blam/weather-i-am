@@ -1,6 +1,3 @@
-# docker-compose.test.yml
-version: '3.8'
-
 services:
   test-db:
     # Use a specific PostgreSQL image

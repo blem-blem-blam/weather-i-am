@@ -11,7 +11,7 @@ from app.models.user_parameter_model import (
 )
 from app.services.user_parameter_service import UserParameterService
 
-router = APIRouter(prefix="/user_parameters", tags=["User Parameters"])
+router = APIRouter(tags=["User Parameters"])
 
 
 @router.get("/{user_id}", response_model=UserParameter)

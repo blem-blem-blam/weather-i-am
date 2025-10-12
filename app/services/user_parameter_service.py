@@ -36,13 +36,9 @@ class UserParameterService(BaseService):
 
 
 class UserParameterDatamanager(BaseDataManager):
-    async def add_user_parameters(
-        self, user_parameters: UserParameter
-    ) -> UserParameter:
+    async def add_user_parameters(self, user_parameters: UserParameter) -> None:
+        """Adds a user_parameters object to the session."""
         self.add_one(user_parameters)
-        await self.session.flush()
-        await self.session.refresh(user_parameters)
-        return user_parameters
 
     async def get_user_params_by_user_id(self, user_id: uuid.UUID) -> UserParameter:
         return await self.get_one(

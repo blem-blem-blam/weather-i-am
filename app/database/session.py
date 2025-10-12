@@ -10,12 +10,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 
 # create session factory to generate new database sessions
-SessionFactory = sessionmaker(
-    bind=create_engine(str(settings.ASYNC_SQL_DATABASE_URI)),
-    autocommit=False,
-    autoflush=False,
-    expire_on_commit=False,
-)
+# SessionFactory = sessionmaker(
+#     bind=create_engine(str(settings.ASYNC_SQL_DATABASE_URI)),
+#     autocommit=False,
+#     autoflush=False,
+#     expire_on_commit=False,
+# )
 
 
 async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
