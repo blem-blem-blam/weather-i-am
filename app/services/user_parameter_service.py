@@ -1,16 +1,33 @@
 import uuid
+from abc import ABC, abstractmethod
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user_parameter_model import (
     UserParameter,
     UserParameterBase,
     UserParameterUpdate,
 )
-from app.services.auth_service import AuthService
-from app.services.base import BaseService, BaseDataManager
+from app.services.base import BaseDataManager
 
 
-class UserParameterService(BaseService):
+class IUserParameterDataManager(ABC):
+    @abstractmethod
+    async def add_user_parameters(
+        self, user_parameters: UserParameter
+    ) -> UserParameter:
+        pass
+
+    @abstractmethod
+    async def get_user_params_by_user_id(
+        self, user_id: uuid.UUID
+    ) -> UserParameter | None:
+        pass
+
+
+class UserParameterService:
+    def __init__(self, data_manager: IUserParameterDataManager):
+        self.data_manager = data_manager
 
     async def add_parameter(
         self, user_id: uuid.UUID, parameter: UserParameterUpdate = None
@@ -25,22 +42,24 @@ class UserParameterService(BaseService):
             user_id=user_id, **user_parameters_base.model_dump()
         )
 
-        return await UserParameterDatamanager(self.session).add_user_parameters(
-            user_parameters
-        )
+        return await self.data_manager.add_user_parameters(user_parameters)
 
-    async def get_user_params_by_user_id(self, user_id: uuid.UUID) -> UserParameter:
-        return await UserParameterDatamanager(self.session).get_user_params_by_user_id(
-            user_id
-        )
+    async def get_user_params_by_user_id(
+        self, user_id: uuid.UUID
+    ) -> UserParameter | None:
+        return await self.data_manager.get_user_params_by_user_id(user_id)
 
 
-class UserParameterDatamanager(BaseDataManager):
-    async def add_user_parameters(self, user_parameters: UserParameter) -> None:
-        """Adds a user_parameters object to the session."""
+class UserParameterDatamanager(BaseDataManager, IUserParameterDataManager):
+    async def add_user_parameters(
+        self, user_parameters: UserParameter
+    ) -> UserParameter:
         self.add_one(user_parameters)
+        return user_parameters
 
-    async def get_user_params_by_user_id(self, user_id: uuid.UUID) -> UserParameter:
+    async def get_user_params_by_user_id(
+        self, user_id: uuid.UUID
+    ) -> UserParameter | None:
         return await self.get_one(
             select(UserParameter).where(UserParameter.user_id == user_id)
         )

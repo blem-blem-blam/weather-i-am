@@ -9,7 +9,7 @@ from sqlmodel import SQLModel
 
 from app.config import settings
 from app.database.session import get_db_session
-from app.models import User, UserParameter
+from app.models import Users, UserParameter
 
 # Import your actual FastAPI app
 from app.main import app  # Adjust this import to your actual app location

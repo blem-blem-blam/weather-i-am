@@ -4,7 +4,7 @@ from fastapi.params import Security
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from app.database.session import get_db_session
-from app.models.user_model import User
+from app.models.user_model import Users
 from ..services.auth_service import (
     AuthService,
     Token,
@@ -12,7 +12,7 @@ from ..services.auth_service import (
     decode_user_jwt,
 )
 
-from ..services.user_service import UserService
+from ..services.user_service import UserDataManager, UserService
 
 
 router = APIRouter(dependencies=[Depends(get_db_session)])
@@ -26,7 +26,9 @@ async def login_for_access_token(
     """
     Authenticate user and return an access token if credentials are valid.
     """
-    retrieved_user = await UserService(db_session).get_user(form_data.username)
+    # We don't need the full user service with all its dependencies here
+    user_data_manager = UserDataManager(db_session)
+    retrieved_user = await user_data_manager.get_user_by_user_name(form_data.username)
 
     if not retrieved_user:
         raise HTTPException(
@@ -59,7 +61,7 @@ async def read_users_me(
 @router.get("/me/scopes", response_model=list[str])
 async def read_users_me(
     # This is the only line that changes
-    current_user: Annotated[User, Security(decode_user_jwt, scopes=["admin"])],
+    current_user: Annotated[Users, Security(decode_user_jwt, scopes=["admin"])],
     db_session: Session = Depends(get_db_session),
 ) -> list[str]:
     """

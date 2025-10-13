@@ -6,7 +6,7 @@ from pydantic import BaseModel
 import uuid
 from datetime import datetime, timedelta
 
-from app.models.user_model import User
+from app.models.user_model import Users
 
 # --- Configuration (keep these in a .env file) ---
 SECRET_KEY = "your-super-secret-key"
@@ -40,7 +40,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 # --- THE CORE DEPENDENCY ---
 async def get_current_user(
     token_wrapper: HTTPBearer = Depends(oauth2_scheme),
-) -> User | None:
+) -> Users | None:
     if token_wrapper is None:
         # No 'Authorization' header was provided at all
         return None
@@ -61,7 +61,7 @@ async def get_current_user(
         raise credentials_exception
 
     # Fetch the user from the database
-    user = await User.get(uuid.UUID(token_data.sub))
+    user = await Users.get(uuid.UUID(token_data.sub))
     if user is None:
         raise credentials_exception
     return user

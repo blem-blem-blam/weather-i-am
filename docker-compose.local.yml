@@ -1,0 +1,18 @@
+services:
+  local-db:
+    # Use a specific PostgreSQL image
+    image: postgres:15-alpine
+
+    # Name the container for easy identification
+    container_name: my_app_local_db
+
+    # Environment variables to configure the database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=shanghai
+      - POSTGRES_DB=weather-i-am-2
+
+    # Map the container's port 5432 to your computer's port 5433
+    # This avoids conflicts if you have another PostgreSQL server running on the default port 5432
+    ports:
+      - "5432:5432"

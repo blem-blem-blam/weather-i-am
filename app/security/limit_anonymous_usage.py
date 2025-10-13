@@ -1,4 +1,4 @@
-from app.models.user_model import User
+from app.models.user_model import Users
 from .token_master import get_current_user
 from fastapi import Depends, HTTPException, status
 
@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 ANONYMOUS_REQUEST_LIMIT = 50
 
 
-async def limit_anonymous_usage(current_user: User = Depends(get_current_user)):
+async def limit_anonymous_usage(current_user: Users = Depends(get_current_user)):
     """
     A dependency that checks usage limits for anonymous users.
     """

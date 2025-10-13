@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlmodel import select
-from app.models.user_model import CustomRoles, Scope, User
+from app.models.user_model import CustomRoles, Scope, Users
 from passlib.context import CryptContext
 import jwt
 
@@ -94,7 +94,7 @@ class AuthMixin:
         return encoded_jwt
 
     @staticmethod
-    def generate_token_for_user(user: User) -> Token:
+    def generate_token_for_user(user: Users) -> Token:
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = AuthService.create_access_token(
             data={
@@ -110,7 +110,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=oauth2_sc
 
 
 class AuthService(BaseService, AuthMixin):
-    def authenticate_user(self, user: User, password: str) -> Token | bool:
+    def authenticate_user(self, user: Users, password: str) -> Token | bool:
         if not user:
             return False
         if not AuthMixin.verify_argon2_password(password, user.hashed_password):
