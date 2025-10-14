@@ -46,11 +46,15 @@ class UserParameterService(IUserParameterService):
     async def add_parameter(
         self, user_id: uuid.UUID, parameter: UserParameterUpdate = None
     ) -> UserParameter:
-        user_parameters_base = user_parameters = (
-            UserParameterBase(preferred_lat=-36.15, preferred_lon=95.98)
-            if not parameter
-            else UserParameterBase(**parameter.model_dump())
+        # Start with default parameters
+        user_parameters_base = UserParameterBase(
+            preferred_lat=-36.15, preferred_lon=95.98
         )
+        if parameter:
+            # Update with any provided custom parameters
+            user_parameters_base = user_parameters_base.model_copy(
+                update=parameter.model_dump(exclude_unset=True)
+            )
 
         user_parameters = UserParameter(
             user_id=user_id, **user_parameters_base.model_dump()
