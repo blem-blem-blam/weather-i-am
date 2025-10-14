@@ -33,7 +33,7 @@ class Users(UserBase, table=True):
     hashed_password: str
     auth_role: CustomRoles = Field(
         sa_column=Column(SAEnum(CustomRoles, name="custom_roles"), nullable=False),
-        default=CustomRoles.BASIC,
+        default=CustomRoles.ANONYMOUS,
     )
 
 

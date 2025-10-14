@@ -20,7 +20,10 @@ async def created_user(client: AsyncClient, test_user_credentials: dict) -> dict
     A fixture that creates a user via the API endpoint before a test runs.
     Returns the credentials of the created user.
     """
-    response = await client.post("/v1/users", params=test_user_credentials)
+    response = await client.post(
+        "/v1/users",
+        json=test_user_credentials,
+    )
     assert response.status_code == 200, "Failed to create user in fixture"
     return test_user_credentials
 

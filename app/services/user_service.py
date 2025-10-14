@@ -23,7 +23,17 @@ class IUserDataManager(ABC):
         pass
 
 
-class UserService:
+class IUserService(ABC):
+    @abstractmethod
+    async def get_user(self, username: str) -> Users | None:
+        pass
+
+    @abstractmethod
+    async def add_user(self, username: str, email: str, password: str) -> Users:
+        pass
+
+
+class UserService(IUserService):
     def __init__(
         self,
         data_manager: IUserDataManager,
