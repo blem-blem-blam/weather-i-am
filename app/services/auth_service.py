@@ -1,18 +1,18 @@
 from datetime import datetime, timedelta, timezone
 
-from typing import Annotated, List
+from typing import Annotated, List, Protocol
 import uuid
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
-from sqlmodel import select
+from abc import ABC, abstractmethod
 from app.models.user_model import CustomRoles, Scope, Users
 from passlib.context import CryptContext
 import jwt
 
-from app.services.base import BaseService, BaseDataManager
+from app.services.base import BaseService
 from ..config import settings
 
 scopes = {
@@ -57,22 +57,27 @@ class TokenPayload(BaseModel):
     scopes: List[str] = []
 
 
+class AuthVerification(BaseModel):
+    success: bool
+    message: str
+
+
 class AuthMixin:
     @staticmethod
     def get_scopes_for_role(role: str) -> list[str]:
         return scopes.get(role, [])
 
     @staticmethod
-    def verify_argon2_password(plain_password, hashed_password) -> bool:
+    def verify_argon2_password(plain_password, hashed_password) -> AuthVerification:
         try:
             ph.verify(hashed_password, plain_password)
-            return True
+            return AuthVerification(success=True, message="Successfully verified")
         except VerifyMismatchError as e:
-            raise e
+            return AuthVerification(success=False, message=str(e))
         except (TypeError, ValueError) as e:
-            raise e
+            return AuthVerification(success=False, message=str(e))
         except Exception as e:
-            raise e
+            return AuthVerification(success=False, message=f"Unknown error:{str(e)}")
 
     @staticmethod
     def get_password_hash(password) -> str:
@@ -109,11 +114,17 @@ class AuthMixin:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=oauth2_scopes)
 
 
-class AuthService(BaseService, AuthMixin):
+class IAuthService(ABC):
+    @abstractmethod
+    def authenticate_user(self, user: Users, password: str) -> Token | bool:
+        pass
+
+
+class AuthService(BaseService, AuthMixin, IAuthService):
     def authenticate_user(self, user: Users, password: str) -> Token | bool:
         if not user:
             return False
-        if not AuthMixin.verify_argon2_password(password, user.hashed_password):
+        if not AuthMixin.verify_argon2_password(password, user.hashed_password).success:
             return False
         return AuthMixin.generate_token_for_user(user)
 
@@ -138,6 +149,10 @@ async def decode_user_jwt(
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
+        if payload.get("sub") is None or payload.get("scopes") is None:
+            # TODO add logging here.
+            raise invalid_jwt_exception
+
         # The 'scopes' in the JWT is a space-delimited string.
         token_scopes = payload.get("scopes", "").split()
         token_data = TokenPayload(sub=payload.get("sub"), scopes=token_scopes)

@@ -25,7 +25,21 @@ class IUserParameterDataManager(ABC):
         pass
 
 
-class UserParameterService:
+class IUserParameterService(ABC):
+    @abstractmethod
+    async def add_parameter(
+        self, user_id: uuid.UUID, parameter: UserParameterUpdate = None
+    ) -> UserParameter:
+        pass
+
+    @abstractmethod
+    async def get_user_params_by_user_id(
+        self, user_id: uuid.UUID
+    ) -> UserParameter | None:
+        pass
+
+
+class UserParameterService(IUserParameterService):
     def __init__(self, data_manager: IUserParameterDataManager):
         self.data_manager = data_manager
 
